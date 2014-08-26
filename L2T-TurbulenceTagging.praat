@@ -199,6 +199,8 @@ procedure judge_trial
       # tagger.
       response_to_tag.consOnset  = consOnset
       response_to_tag.turbOffset = turbOffset
+      # Export the [.consonant_label$].
+      response_to_tag.consonant_label$ = consonant_type$
     else
       response_to_tag.consonant_label$ = consonant_type$
     endif

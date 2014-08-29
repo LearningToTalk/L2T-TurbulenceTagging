@@ -119,6 +119,7 @@ procedure consonant_types
   .sib_affr$    = "Sibilant affricate"
   .nonsib_fric$ = "Non-sibilant fricative"
   .nonsib_plos$ = "Non-sibilant plosive"
+  .malaprop$    = "Malaprop"
   .other$       = "Other"
   # Gather the Consonant Types into a vector.
   .slot1$ = .sib_fric$
@@ -132,7 +133,7 @@ endproc
 
 # Prompt the user to judge the consonant type of the response and add any
 # supplementary notes.
-procedure judge_trial
+procedure tagging_form
   .no_taggable_response$ = "No response is taggable"
   .missing_data$         = "MissingData"
   @consonant_types
@@ -171,9 +172,12 @@ procedure judge_trial
       endif
     # Allow the tagger to record notes about the trial.
     comment: "Would you like to record any notes for this trial?"
+    boolean: "Quiet", 0
+    boolean: "Clipping", 0
     boolean: "BackgroundNoise", 0
-    boolean: "Malaprop", 0
     boolean: "OverlappingResponse", 0
+    boolean: "Malaprop", 0
+    sentence: "Malaprop word", ""
     # Check if either consOnset or turbOffset needs to be tagged as well.
     comment: "Is it necessary to tag consOnset and turbOffset independently?"
     boolean: "consOnset", 0
@@ -224,6 +228,25 @@ procedure judge_trial
   endif
   # Concatenate the Notes together.
   response_to_tag.notes$ = ""
+  # Quiet
+  if quiet
+    if response_to_tag.notes$ == ""
+      response_to_tag.notes$ = "Quiet"
+    else
+      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                           ... "Quiet"
+    endif
+  endif
+  # Clipping
+  if clipping
+    if response_to_tag.notes$ == ""
+      response_to_tag.notes$ = "Clipping"
+    else
+      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                           ... "Clipping"
+    endif
+  endif
+  # BackgroundNoise
   if backgroundNoise
     if response_to_tag.notes$ == ""
       response_to_tag.notes$ = "BackgroundNoise"
@@ -232,14 +255,7 @@ procedure judge_trial
                            ... "BackgroundNoise"
     endif
   endif
-  if malaprop
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "Malaprop"
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "Malaprop"
-    endif
-  endif
+  # OverlappingResponse
   if overlappingResponse
     if response_to_tag.notes$ == ""
       response_to_tag.notes$ = "OverlappingResponse"
@@ -248,12 +264,34 @@ procedure judge_trial
                            ... "OverlappingResponse"
     endif
   endif
+  if malaprop
+    while malaprop_word$ == ""
+      @prompt_for_malaprop_word
+    endwhile
+    if response_to_tag.notes$ == ""
+      response_to_tag.notes$ = "Malaprop" + ":" + malaprop_word$
+    else
+      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                           ... "Malaprop" + ":" + malaprop_word$
+    endif
+  endif
+endproc
+
+
+# A procedure that prompts the user for the malapropism that the child
+# produced.
+procedure prompt_for_malaprop_word
+  beginPause: "Malapropism" + " :: " + current_trial.trial_number$ + " :: " +
+          ... current_trial.target_word$
+    comment: "What malapropism did the child produce?"
+    sentence: "Malaprop word", ""
+  endPause: "", "Continue", 2, 1
 endproc
 
 
 # A procedure for setting information about the response to tag.
 procedure response_to_tag
-  # The following variables are set by the procedure @judge_trial.
+  # The following variables are set by the procedure @tagging_form.
   #   .repetition
   #   .consonant_label$
   #   .consonant_type$
@@ -375,17 +413,21 @@ endproc
 # the response to tag.
 procedure tag_turbulence_notes
   if response_to_tag.notes$ <> ""
-    # Insert the interval boundaries.
-    @insert_boundaries: turbulence_textgrid_tiers.turb_notes
-    # Determine the interval number on the TurbNotes tier.
-    @interval_at_time: turbulence_textgrid.praat_obj$,
-                   ... turbulence_textgrid_tiers.turb_notes,
-                   ... response_to_tag.xmid
-    # Label the interval.
-    @label_interval: turbulence_textgrid.praat_obj$,
-                 ... turbulence_textgrid_tiers.turb_notes,
-                 ... interval_at_time.interval,
-                 ... response_to_tag.notes$
+  @insert_point: turbulence_textgrid.praat_obj$,
+             ... turbulence_textgrid_tiers.turb_notes,
+             ... response_to_tag.xmid,
+             ... response_to_tag.notes$
+#    # Insert the interval boundaries.
+#    @insert_boundaries: turbulence_textgrid_tiers.turb_notes
+#    # Determine the interval number on the TurbNotes tier.
+#    @interval_at_time: turbulence_textgrid.praat_obj$,
+#                   ... turbulence_textgrid_tiers.turb_notes,
+#                   ... response_to_tag.xmid
+#    # Label the interval.
+#    @label_interval: turbulence_textgrid.praat_obj$,
+#                 ... turbulence_textgrid_tiers.turb_notes,
+#                 ... interval_at_time.interval,
+#                 ... response_to_tag.notes$
   endif
 endproc
 
@@ -562,8 +604,9 @@ if ready.to_tag_turbulence_events
     @zoom: turbulence_textgrid.praat_obj$,
        ... current_trial.zoom_xmin,
        ... current_trial.zoom_xmax
-    # Present the user with a form, with which she can judge the trial.
-    @judge_trial
+    # Present the user with the [tagging_form], with which she can judge the 
+    # trial.
+    @tagging_form
     # Set information about the [response_to_tag]
     @response_to_tag
     # Tag the response.

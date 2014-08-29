@@ -126,8 +126,9 @@ procedure consonant_types
   .slot2$ = .sib_affr$
   .slot3$ = .nonsib_fric$
   .slot4$ = .nonsib_plos$
-  .slot5$ = .other$
-  .length = 5
+  .slot5$ = .malaprop$
+  .slot6$ = .other$
+  .length = 6
 endproc
 
 
@@ -154,7 +155,7 @@ procedure tagging_form
       option: consonant_types.slot'i'$
     endfor
     # Transcribe a sibilant fricative.
-    comment: "If the consonant is a sibilant fricative, please transcribe its Place."
+    comment: "If the consonant is a sibilant fricative (or an acceptable malapropism), please transcribe its Place."
       if current_trial.target_c$ == "s"
         optionMenu: "Fricative place", 1
           option: "s"
@@ -216,6 +217,18 @@ procedure tagging_form
       response_to_tag.turbOffset = turbOffset
       # Export the [.consonant_label$].
       response_to_tag.consonant_label$ = consonant_type$
+    elif consonant_type$ == consonant_types.malaprop$
+      # Export the [.consOnset] and [.turbOffset] values as chosen by the
+      # tagger.
+      response_to_tag.consOnset  = consOnset
+      response_to_tag.turbOffset = turbOffset
+      # Construct the ConsType label.
+      while malaprop_word$ == ""
+        @prompt_for_malaprop_word
+      endwhile
+      response_to_tag.consonant_label$ = consonant_type$ + ":" +
+                                     ... malaprop_word$ + ";" +
+                                     ... fricative_place$
     else
       response_to_tag.consonant_label$ = consonant_type$
     endif
@@ -302,7 +315,8 @@ procedure response_to_tag
   # [consonant_type$] is a global variable whose value is set when the user
   # judges the trial.
   if (.consonant_type$ == consonant_types.sib_fric$) |
-     ... (.consonant_type$ == consonant_types.sib_affr$)
+     ... (.consonant_type$ == consonant_types.sib_affr$) |
+     ... (.consonant_type$ == consonant_types.malaprop$)
     .is_sibilant = 1
   else
     .is_sibilant = 0
@@ -417,17 +431,6 @@ procedure tag_turbulence_notes
              ... turbulence_textgrid_tiers.turb_notes,
              ... response_to_tag.xmid,
              ... response_to_tag.notes$
-#    # Insert the interval boundaries.
-#    @insert_boundaries: turbulence_textgrid_tiers.turb_notes
-#    # Determine the interval number on the TurbNotes tier.
-#    @interval_at_time: turbulence_textgrid.praat_obj$,
-#                   ... turbulence_textgrid_tiers.turb_notes,
-#                   ... response_to_tag.xmid
-#    # Label the interval.
-#    @label_interval: turbulence_textgrid.praat_obj$,
-#                 ... turbulence_textgrid_tiers.turb_notes,
-#                 ... interval_at_time.interval,
-#                 ... response_to_tag.notes$
   endif
 endproc
 

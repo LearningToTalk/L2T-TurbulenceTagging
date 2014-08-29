@@ -28,6 +28,17 @@ procedure ready
 endproc
 
 
+# A procedure that sets the spectrogram settings for turbulence tagging.
+# View range (Hz): 0.0 -- 15000.0
+# Window size (s): 0.005
+# Dynamic range (dB): 40.0
+procedure spectrogram_settings
+  editor 'turbulence_textgrid.praat_obj$'
+    Spectrogram settings... 0.0 15000.0 0.005 40.0
+  endeditor
+endproc
+
+
 # Information about the current trial being tagged.
 procedure current_trial
   # Determine the [.row_on_wordlist] that designates the current trial.
@@ -538,6 +549,8 @@ if ready.to_tag_turbulence_events
   # Turbulence TextGrid.
   @open_editor: turbulence_textgrid.praat_obj$,
             ... audio.praat_obj$
+  # Set the spectrogram settings in the Editor window.
+  @spectrogram_settings
   # Enter a while-loop, within which the tagging is performed.
   continue_tagging = 1
   while continue_tagging

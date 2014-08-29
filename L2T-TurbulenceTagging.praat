@@ -125,33 +125,33 @@ procedure judge_trial
   .no_taggable_response$ = "No response is taggable"
   .missing_data$         = "MissingData"
   @consonant_types
-  beginPause: current_trial.trial_number$ + " :: " +
+  beginPause: "Tagging Form" + " :: " + current_trial.trial_number$ + " :: " +
           ... current_trial.target_word$
     #comment: "Please listen to the current trial in its entirety."
     # Determine the taggable response.
     comment: "Which response would you like to tag?"
-    choice: "Response", 1
+    optionMenu: "Response", 1
       for i to segmentations_of_current_trial.n_segmentations
         option: segmentations_of_current_trial.segmentation'i'$
       endfor
       option: .no_taggable_response$
     # Determine Consonant Type of the taggable response
     comment: "If there is a taggable response, what type of consonant was produced?"
-    choice: "Consonant type", 1
+    optionMenu: "Consonant type", 1
     for i to consonant_types.length
       option: consonant_types.slot'i'$
     endfor
     # Transcribe a sibilant fricative.
     comment: "If the consonant is a sibilant fricative, please transcribe its Place."
       if current_trial.target_c$ == "s"
-        choice: "Fricative place", 1
+        optionMenu: "Fricative place", 1
           option: "s"
           option: "s:$S"
           option: "$S:s"
           option: "$S"
           option: "other"
       elif current_trial.target_c$ == "S"
-        choice: "Fricative place", 4
+        optionMenu: "Fricative place", 4
           option: "$s"
           option: "$s:S"
           option: "S:$s"

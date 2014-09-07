@@ -179,113 +179,116 @@ procedure tagging_form
     boolean: "OverlappingResponse", 0
     boolean: "Malaprop", 0
     sentence: "Malaprop word", ""
-    # Check if either consOnset or turbOffset needs to be tagged as well.
-    comment: "Is it necessary to tag consOnset and turbOffset independently?"
-    boolean: "consOnset", 0
-    boolean: "turbOffset", 0
-  endPause: "", "Tag it!", 2, 1
-  # Export variables to the [response_to_tag] namespace.
-  # By default, export the [.consOnset] and [.turbOffset] values to both be
-  # 0.  This guards against the tagger accidentally clicking one of the check
-  # boxes for these events.  The tagger's choice is restored below under the
-  # blocks where {consonant_type$ == consonant_types.sib_fric$} or
-  # {consonant_type$ == consonant_types.sib_affr$}.
-  response_to_tag.consOnset  = 0
-  response_to_tag.turbOffset = 0
-  # Check to see if this trial had a taggable response.
-  if response$ <> .no_taggable_response$
-    # If this trial had a taggable response, then that segmentation is tagged
-    # with the consonant label provided by the tagger.
-    response_to_tag.repetition = response
-    # Store the consonant_type$
-    response_to_tag.consonant_type$ = consonant_type$
-    # The value of the [.consonant_label$] variable depends on the adjudged
-    # [consonant_type$]
-    if consonant_type$ == consonant_types.sib_fric$
-      # If the target consonant was produced as a SIBILANT FRICATIVE, then the
-      # label of the ConsType tier is SibilantFricative;<transcription>.
-      response_to_tag.consonant_label$ = consonant_type$ + ";" +
-                                     ... fricative_place$
-      # Export the [.consOnset] and [.turbOffset] values as chosen by the
-      # tagger.
-      response_to_tag.consOnset  = consOnset
-      response_to_tag.turbOffset = turbOffset
-    elif consonant_type$ == consonant_types.sib_affr$
-      # Export the [.consOnset] and [.turbOffset] values as chosen by the
-      # tagger.
-      response_to_tag.consOnset  = consOnset
-      response_to_tag.turbOffset = turbOffset
-      # Export the [.consonant_label$].
-      response_to_tag.consonant_label$ = consonant_type$
-    elif consonant_type$ == consonant_types.malaprop$
-      # Export the [.consOnset] and [.turbOffset] values as chosen by the
-      # tagger.
-      response_to_tag.consOnset  = consOnset
-      response_to_tag.turbOffset = turbOffset
-      # Construct the ConsType label.
+#    # Check if either consOnset or turbOffset needs to be tagged as well.
+#    comment: "Is it necessary to tag consOnset and turbOffset independently?"
+#    boolean: "consOnset", 0
+#    boolean: "turbOffset", 0
+  .button = endPause: "Save progress & quit", "Tag it!", 2, 1
+  if .button == 2
+    # Export variables to the [response_to_tag] namespace.
+#  # By default, export the [.consOnset] and [.turbOffset] values to both be
+#  # 0.  This guards against the tagger accidentally clicking one of the check
+#  # boxes for these events.  The tagger's choice is restored below under the
+#  # blocks where {consonant_type$ == consonant_types.sib_fric$} or
+#  # {consonant_type$ == consonant_types.sib_affr$}.
+#  response_to_tag.consOnset  = 0
+#  response_to_tag.turbOffset = 0
+    # Check to see if this trial had a taggable response.
+    if response$ <> .no_taggable_response$
+      # If this trial had a taggable response, then that segmentation is tagged
+      # with the consonant label provided by the tagger.
+      response_to_tag.repetition = response
+      # Store the consonant_type$
+      response_to_tag.consonant_type$ = consonant_type$
+      # The value of the [.consonant_label$] variable depends on the adjudged
+      # [consonant_type$]
+      if consonant_type$ == consonant_types.sib_fric$
+        # If the target consonant was produced as a SIBILANT FRICATIVE, then the
+        # label of the ConsType tier is SibilantFricative;<transcription>.
+        response_to_tag.consonant_label$ = consonant_type$ + ";" +
+                                       ... fricative_place$
+#      # Export the [.consOnset] and [.turbOffset] values as chosen by the
+#      # tagger.
+#      response_to_tag.consOnset  = consOnset
+#      response_to_tag.turbOffset = turbOffset
+      elif consonant_type$ == consonant_types.sib_affr$
+#      # Export the [.consOnset] and [.turbOffset] values as chosen by the
+#      # tagger.
+#      response_to_tag.consOnset  = consOnset
+#      response_to_tag.turbOffset = turbOffset
+        # Export the [.consonant_label$].
+        response_to_tag.consonant_label$ = consonant_type$
+      elif consonant_type$ == consonant_types.malaprop$
+#      # Export the [.consOnset] and [.turbOffset] values as chosen by the
+#      # tagger.
+#      response_to_tag.consOnset  = consOnset
+#      response_to_tag.turbOffset = turbOffset
+        # Construct the ConsType label.
+        while malaprop_word$ == ""
+          @prompt_for_malaprop_word
+        endwhile
+        response_to_tag.consonant_label$ = consonant_type$ + ":" +
+                                       ... malaprop_word$ + ";" +
+                                       ... fricative_place$
+      else
+        response_to_tag.consonant_label$ = consonant_type$
+      endif
+    else
+      # If this trial had no taggable response, then the FIRST segmentation is
+      # tagged with the label: "MissingData"
+      response_to_tag.repetition = 1
+      response_to_tag.consonant_label$ = .missing_data$
+      response_to_tag.consonant_type$  = .missing_data$
+    endif
+    # Concatenate the Notes together.
+    response_to_tag.notes$ = ""
+    # Quiet
+    if quiet
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "Quiet"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "Quiet"
+      endif
+    endif
+    # Clipping
+    if clipping
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "Clipping"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "Clipping"
+      endif
+    endif
+    # BackgroundNoise
+    if backgroundNoise
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "BackgroundNoise"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "BackgroundNoise"
+      endif
+    endif
+    # OverlappingResponse
+    if overlappingResponse
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "OverlappingResponse"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "OverlappingResponse"
+      endif
+    endif
+    # Malaprop
+    if malaprop
       while malaprop_word$ == ""
         @prompt_for_malaprop_word
       endwhile
-      response_to_tag.consonant_label$ = consonant_type$ + ":" +
-                                     ... malaprop_word$ + ";" +
-                                     ... fricative_place$
-    else
-      response_to_tag.consonant_label$ = consonant_type$
-    endif
-  else
-    # If this trial had no taggable response, then the FIRST segmentation is
-    # tagged with the label: "MissingData"
-    response_to_tag.repetition = 1
-    response_to_tag.consonant_label$ = .missing_data$
-    response_to_tag.consonant_type$  = .missing_data$
-  endif
-  # Concatenate the Notes together.
-  response_to_tag.notes$ = ""
-  # Quiet
-  if quiet
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "Quiet"
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "Quiet"
-    endif
-  endif
-  # Clipping
-  if clipping
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "Clipping"
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "Clipping"
-    endif
-  endif
-  # BackgroundNoise
-  if backgroundNoise
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "BackgroundNoise"
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "BackgroundNoise"
-    endif
-  endif
-  # OverlappingResponse
-  if overlappingResponse
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "OverlappingResponse"
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "OverlappingResponse"
-    endif
-  endif
-  if malaprop
-    while malaprop_word$ == ""
-      @prompt_for_malaprop_word
-    endwhile
-    if response_to_tag.notes$ == ""
-      response_to_tag.notes$ = "Malaprop" + ":" + malaprop_word$
-    else
-      response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
-                           ... "Malaprop" + ":" + malaprop_word$
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "Malaprop" + ":" + malaprop_word$
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "Malaprop" + ":" + malaprop_word$
+      endif
     endif
   endif
 endproc
@@ -352,7 +355,7 @@ endproc
 # Add to the TextGrid, the ConsType information for the current response.
 # A procedure for adding to the Turbulence Tagging TextGrid, the ConsType
 # information for the response to tag.
-procedure tag_consonant_type
+procedure add_consonant_type
   # Insert the interval boundaries.
   @insert_boundaries: turbulence_textgrid_tiers.cons_type
   # Determine the interval number on the ConsType tier.
@@ -367,65 +370,9 @@ procedure tag_consonant_type
 endproc
 
 
-# A procedure for setting the turbulence events' labels and times for the
-# response to tag.
-procedure turbulence_events
-  .cons_onset$  = "consOnset"
-  .turb_onset$  = "turbOnset"
-  .turb_offset$ = "turbOffset"
-  .vot$         = "VOT"
-  .vowel_end$   = "vowelEnd"
-  # Gather the turbulence event tags into a vector that is specific to the
-  # current response.
-  if response_to_tag.consOnset
-    .slot1$ = .cons_onset$
-    .slot2$ = .turb_onset$
-    if response_to_tag.turbOffset
-      .slot3$ = .turb_offset$
-      .slot4$ = .vot$
-      .slot5$ = .vowel_end$
-    else
-      .slot3$ = .vot$
-      .slot4$ = .vowel_end$
-    endif
-  else
-    .slot1$ = .turb_onset$
-    if response_to_tag.turbOffset
-      .slot2$ = .turb_offset$
-      .slot3$ = .vot$
-      .slot4$ = .vowel_end$
-    else
-      .slot2$ = .vot$
-      .slot3$ = .vowel_end$
-    endif
-  endif
-  .length = 3 + response_to_tag.consOnset + response_to_tag.turbOffset
-  # Determine the times at which the turbulence event tags should be dropped.
-  .time1 = response_to_tag.xmin + (0.1 * response_to_tag.duration)
-  .time'.length' = response_to_tag.xmax - (0.1 * response_to_tag.duration)
-  .increment = (.time'.length' - .time1) / (.length - 1)
-  for i from 2 to (.length - 1)
-    .time'i' = .time1 + (.increment * (i - 1))
-  endfor
-endproc
-
-
-# A procedure that adds, to the Turbulence Tagging TextGrid, the TurbEvents of 
-# the response to tag.
-procedure tag_turbulence_events
-  @turbulence_events
-  for i to turbulence_events.length
-    @insert_point: turbulence_textgrid.praat_obj$,
-               ... turbulence_textgrid_tiers.turb_events,
-               ... turbulence_events.time'i',
-               ... turbulence_events.slot'i'$
-  endfor
-endproc
-
-
 # A procedure that adds, to the Turbulence Tagging TextGrid, the TurbNotes of
 # the response to tag.
-procedure tag_turbulence_notes
+procedure add_turbulence_notes
   if response_to_tag.notes$ <> ""
   @insert_point: turbulence_textgrid.praat_obj$,
              ... turbulence_textgrid_tiers.turb_notes,
@@ -437,36 +384,129 @@ endproc
 
 # A procedure that adds, to the Turbulence Tagging TextGrid, the ConsType,
 # TurbEvents, and TurbNotes of the response to tag.
-procedure tag_response
-  # Always add the ConsType.
-  @tag_consonant_type
-  # Add the TurbEvents, only if the [response_to_tag.is_sibilant].
+procedure transcribe_and_annotate_response
+  # Add the ConsType.
+  @add_consonant_type
+  # Add the TurbNotes.
+  @add_turbulence_notes
+endproc
+
+
+# A procedure that allows the user to iteratively tag turbulence events.
+procedure tag_turbulence_events
+  .cons_onset$  = "consOnset"
+  .turb_onset$  = "turbOnset"
+  .turb_offset$ = "turbOffset"
+  .vot$         = "VOT"
+  .vowel_end$   = "vowelEnd"
   if response_to_tag.is_sibilant
-    @tag_turbulence_events
+    .tagging_turbulence_events = 1
+    while .tagging_turbulence_events
+      beginPause: "Tagging turbulence events" + " :: " + 
+              ... current_trial.trial_number$ + " :: " +
+              ... current_trial.target_word$
+        comment: "In the Editor window, position the cursor where you'd like to tag an event."
+        comment: "Select which event you'd like to tag."
+        choice: "Turbulence event", 2
+        option: .cons_onset$
+        option: .turb_onset$
+        option: .turb_offset$
+        option: .vot$
+        option: .vowel_end$
+      .button = endPause: "", "Tag event", "Move on", 2, 1
+      if .button == 2
+        # Get the cursor position from the Editor window.
+        editor 'turbulence_textgrid.praat_obj$'
+          .event_time = Get cursor
+        endeditor
+        # The user's selection of 'Turbulence event' determines the event label.
+        .event_label$ = turbulence_event$
+        @insert_point: turbulence_textgrid.praat_obj$,
+                   ... turbulence_textgrid_tiers.turb_events,
+                   ... .event_time,
+                   ... .event_label$
+      elif .button == 3
+        .tagging_turbulence_events = 0
+      endif
+    endwhile
   endif
-  # Always add the TurbNotes.
-  @tag_turbulence_notes
 endproc
 
 
-# A procedure that pauses the script while the user adjusts the events on the
-# TurbEvents tier, and then asks the user to choose what she would like to do
-# next.
-procedure adjust_turb_events
-  .next_trial$ = "Move on to the next trial"
-  .extract$    = "Extract the trial that I just tagged"
-  .save_quit$  = "Save my progress & quit"
-  beginPause: current_trial.trial_number$ + " :: " +
-          ... current_trial.target_word$
-    comment: "Please adjust all of the event-points on the TurbEvents Tier."
-    comment: "Once you've finished that, let me know what you want to do next."
-    choice: "I want to", 1
-      option: .next_trial$
-      #option: .extract$
-      option: .save_quit$
-  endPause: "", "Do it!", 2, 1
-  .what_next$ = i_want_to$
-endproc
+# # A procedure for setting the turbulence events' labels and times for the
+# # response to tag.
+# procedure turbulence_events
+#   .cons_onset$  = "consOnset"
+#   .turb_onset$  = "turbOnset"
+#   .turb_offset$ = "turbOffset"
+#   .vot$         = "VOT"
+#   .vowel_end$   = "vowelEnd"
+#   # Gather the turbulence event tags into a vector that is specific to the
+#   # current response.
+#   if response_to_tag.consOnset
+#     .slot1$ = .cons_onset$
+#     .slot2$ = .turb_onset$
+#     if response_to_tag.turbOffset
+#       .slot3$ = .turb_offset$
+#       .slot4$ = .vot$
+#       .slot5$ = .vowel_end$
+#     else
+#       .slot3$ = .vot$
+#       .slot4$ = .vowel_end$
+#     endif
+#   else
+#     .slot1$ = .turb_onset$
+#     if response_to_tag.turbOffset
+#       .slot2$ = .turb_offset$
+#       .slot3$ = .vot$
+#       .slot4$ = .vowel_end$
+#     else
+#       .slot2$ = .vot$
+#       .slot3$ = .vowel_end$
+#     endif
+#   endif
+#   .length = 3 + response_to_tag.consOnset + response_to_tag.turbOffset
+#   # Determine the times at which the turbulence event tags should be dropped.
+#   .time1 = response_to_tag.xmin + (0.1 * response_to_tag.duration)
+#   .time'.length' = response_to_tag.xmax - (0.1 * response_to_tag.duration)
+#   .increment = (.time'.length' - .time1) / (.length - 1)
+#   for i from 2 to (.length - 1)
+#     .time'i' = .time1 + (.increment * (i - 1))
+#   endfor
+# endproc
+#
+#
+# # A procedure that adds, to the Turbulence Tagging TextGrid, the TurbEvents of
+# # the response to tag.
+# procedure tag_turbulence_events
+#   @turbulence_events
+#   for i to turbulence_events.length
+#     @insert_point: turbulence_textgrid.praat_obj$,
+#                ... turbulence_textgrid_tiers.turb_events,
+#                ... turbulence_events.time'i',
+#                ... turbulence_events.slot'i'$
+#   endfor
+# endproc
+#
+#
+# # A procedure that pauses the script while the user adjusts the events on the
+# # TurbEvents tier, and then asks the user to choose what she would like to do
+# # next.
+# procedure adjust_turb_events
+#   .next_trial$ = "Move on to the next trial"
+#   .extract$    = "Extract the trial that I just tagged"
+#   .save_quit$  = "Save my progress & quit"
+#   beginPause: current_trial.trial_number$ + " :: " +
+#           ... current_trial.target_word$
+#     comment: "Please adjust all of the event-points on the TurbEvents Tier."
+#     comment: "Once you've finished that, let me know what you want to do next."
+#     choice: "I want to", 1
+#       option: .next_trial$
+#       #option: .extract$
+#       option: .save_quit$
+#   endPause: "", "Do it!", 2, 1
+#   .what_next$ = i_want_to$
+# endproc
 
 
 # A procedure for incrementing the number of trials tagged, as logged on the
@@ -535,11 +575,6 @@ procedure move_on_from_current_trial
     @quit_tagging
     # Congratulate the user on finishing a file.
     @congratulations_on_a_job_well_done
-  elif adjust_turb_events.what_next$ == adjust_turb_events.save_quit$
-    # Clean up Praat's Objects list.
-    @clear_objects_list
-    # Quit tagging.
-    @quit_tagging
   endif
 endproc
 
@@ -610,19 +645,26 @@ if ready.to_tag_turbulence_events
     # Present the user with the [tagging_form], with which she can judge the 
     # trial.
     @tagging_form
-    # Set information about the [response_to_tag]
-    @response_to_tag
-    # Tag the response.
-    @tag_response
-    # Zoom to the tagged response.
-    @zoom: turbulence_textgrid.praat_obj$,
-       ... response_to_tag.zoom_xmin,
-       ... response_to_tag.zoom_xmax
-    # Pause the script to allow the user to adjust the points on the TurbEvents
-    # tier.
-    @adjust_turb_events
-    # Move on from the current trial.
-    @move_on_from_current_trial
+    if tagging_form.button == 2
+      # Set information about the [response_to_tag]
+      @response_to_tag
+      # Transcribe and annotate the response.
+      @transcribe_and_annotate_response
+      # Zoom to the tagged response.
+      @zoom: turbulence_textgrid.praat_obj$,
+         ... response_to_tag.zoom_xmin,
+         ... response_to_tag.zoom_xmax
+      # Pause the script to allow the user to tag the turbulence events.
+      @tag_turbulence_events
+      # Move on from the current trial.
+      @move_on_from_current_trial
+    elif tagging_form.button == 1
+      # Clean up Praat's Objects list.
+      @remove: segmentations_of_current_trial.praat_obj$
+      @clear_objects_list
+      # Quit tagging.
+      @quit_tagging
+    endif
   endwhile
 endif
 

@@ -177,6 +177,8 @@ procedure tagging_form
     boolean: "Clipping", 0
     boolean: "BackgroundNoise", 0
     boolean: "OverlappingResponse", 0
+    boolean: "NonInitial", 0
+    boolean: "Whistled", 0
     boolean: "Malaprop", 0
     sentence: "Malaprop word", ""
 #    # Check if either consOnset or turbOffset needs to be tagged as well.
@@ -276,6 +278,22 @@ procedure tagging_form
       else
         response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
                              ... "OverlappingResponse"
+      endif
+    endif
+    # NonInitial
+    if nonInitial
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "NonInitial"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + "NonInitial"
+      endif
+    endif
+    # Whistled
+    if whistled
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "Whistled"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + "Whistled"
       endif
     endif
     # Malaprop

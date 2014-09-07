@@ -431,7 +431,7 @@ procedure tag_turbulence_events
         option: .turb_offset$
         option: .vot$
         option: .vowel_end$
-      .button = endPause: "", "Tag event", "Move on", 2, 1
+      .button = endPause: "", "Tag it!", "Extract trial", "Move on", 2, 1
       if .button == 2
         # Get the cursor position from the Editor window.
         editor 'turbulence_textgrid.praat_obj$'
@@ -444,6 +444,8 @@ procedure tag_turbulence_events
                    ... .event_time,
                    ... .event_label$
       elif .button == 3
+        @extract_trial_as_example
+      elif .button == 4
         .tagging_turbulence_events = 0
       endif
     endwhile
@@ -594,6 +596,37 @@ procedure move_on_from_current_trial
     # Congratulate the user on finishing a file.
     @congratulations_on_a_job_well_done
   endif
+endproc
+
+
+# A procedure for extracting the audio of the current trial.
+procedure extract_trial_as_example
+  .extract_directory$ = session_parameters.experiment_directory$ + "/" +
+                    ... "TurbulenceTagging" + "/" + "ExtractedExamples"
+  .extract_basename$ = session_parameters.experimental_task$ + "_" +
+                   ... participant.id$ + "_" +
+                   ... session_parameters.initials$ + "_" +
+                   ... current_trial.trial_number$ + "_" +
+                   ... current_trial.target_word$
+  .extract_filepath$ = .extract_directory$ + "/" + .extract_basename$ +
+                   ... ".Collection"
+  # Extract the audio of the current trial.
+  select 'audio.praat_obj$'
+  Extract part... 'current_trial.xmin' 'current_trial.xmax' rectangular 1.0 1
+  Rename... '.extract_basename$'
+  .wav_obj$ = selected$()
+  # Extract the TextGrid of the current trial.
+  select 'turbulence_textgrid.praat_obj$'
+  Extract part... 'current_trial.xmin' 'current_trial.xmax' 1
+  Rename... '.extract_basename$'
+  .tg_obj$ = selected$()
+  # Save the [.wav_obj$] and [.tg_obj$] as a Praat Collection.
+  select '.wav_obj$'
+  plus '.tg_obj$'
+  Save as text file... '.extract_filepath$'
+  # Clean up Praat's Objects list.
+  @remove: .wav_obj$
+  @remove: .tg_obj$
 endproc
 
 

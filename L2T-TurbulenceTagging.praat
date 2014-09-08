@@ -35,6 +35,8 @@ endproc
 procedure spectrogram_settings
   editor 'turbulence_textgrid.praat_obj$'
     Spectrogram settings... 0.0 15000.0 0.005 40.0
+    Pitch settings... 2000.0 2500.0 Hertz autocorrelation automatic
+    Intensity settings... 25.0 100.0 "mean energy" 1
   endeditor
 endproc
 

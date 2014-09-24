@@ -180,6 +180,7 @@ procedure tagging_form
       endif
     # Allow the tagger to record notes about the trial.
     comment: "Would you like to record any notes for this trial?"
+    boolean: "BorderlineAffricate", 0
     boolean: "Quiet", 0
     boolean: "Clipping", 0
     boolean: "BackgroundNoise", 0
@@ -251,6 +252,15 @@ procedure tagging_form
     endif
     # Concatenate the Notes together.
     response_to_tag.notes$ = ""
+    # BorderlineAffricate
+    if borderlineAffricate
+      if response_to_tag.notes$ == ""
+        response_to_tag.notes$ = "BorderlineAffricate"
+      else
+        response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+                             ... "BorderlineAffricate"
+      endif
+    endif
     # Quiet
     if quiet
       if response_to_tag.notes$ == ""

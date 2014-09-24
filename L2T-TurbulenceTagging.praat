@@ -140,8 +140,13 @@ procedure tagging_form
   .no_taggable_response$ = "No response is taggable"
   .missing_data$         = "MissingData"
   @consonant_types
-  beginPause: "Tagging Form" + " :: " + current_trial.trial_number$ + " :: " +
-          ... current_trial.target_word$
+  # Import string variables from [current_trial] namespace.
+  .trial_number$ = current_trial.trial_number$
+  .target_word$  = current_trial.target_word$
+  .target_c$     = current_trial.target_c$
+  .target_v$     = current_trial.target_v$
+  .title$ = .trial_number$ + " :: " + .target_word$ + " :: " + .target_c$ + " :: " + .target_v$
+  beginPause: .title$
     #comment: "Please listen to the current trial in its entirety."
     # Determine the taggable response.
     comment: "Which response would you like to tag?"
@@ -422,9 +427,13 @@ procedure tag_turbulence_events
   if response_to_tag.is_sibilant
     .tagging_turbulence_events = 1
     while .tagging_turbulence_events
-      beginPause: "Tagging turbulence events" + " :: " + 
-              ... current_trial.trial_number$ + " :: " +
-              ... current_trial.target_word$
+      # Import string variables from [current_trial] namespace.
+      .trial_number$ = current_trial.trial_number$
+      .target_word$  = current_trial.target_word$
+      .target_c$     = current_trial.target_c$
+      .target_v$     = current_trial.target_v$
+      .title$ = .trial_number$ + " :: " + .target_word$ + " :: " + .target_c$ + " :: " + .target_v$
+      beginPause: "Tagging turbulence events" + " :: " + .title$
         comment: "In the Editor window, position the cursor where you'd like to tag an event."
         comment: "Select which event you'd like to tag."
         choice: "Turbulence event", 2

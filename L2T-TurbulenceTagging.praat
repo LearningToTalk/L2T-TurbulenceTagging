@@ -538,6 +538,9 @@ procedure increment_trials_tagged
   .n_segmented = Get value... 1 'turbulence_log_columns.tagged_trials$'
   .n_segmented = .n_segmented + 1
   Set numeric value... 1 'turbulence_log_columns.tagged_trials$' '.n_segmented'
+  @timestamp
+  select 'turbulence_log.praat_obj$'
+  Set string value... 1 'turbulence_log_columns.end_time$' 'timestamp.time$'
 endproc
 
 

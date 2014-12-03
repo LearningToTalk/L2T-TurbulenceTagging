@@ -194,6 +194,7 @@ procedure tagging_form
 			boolean: "ConsonantSequence", 0
 			boolean: "Quiet", 0
 			boolean: "Clipping", 0
+            boolean: "Deleted", 0
 			boolean: "BackgroundNoise", 0
 			boolean: "OverlappingResponse", 0
 			boolean: "NonInitial", 0
@@ -312,7 +313,17 @@ procedure tagging_form
 						... "Clipping"
 				endif
 			endif
-
+            
+			# Deleted
+			if deleted
+				if response_to_tag.notes$ == ""
+					response_to_tag.notes$ = "Deleted"
+				else
+					response_to_tag.notes$ = response_to_tag.notes$ + ";" + 
+						... "Deleted"
+				endif
+			endif
+            
 			# BackgroundNoise
 			if backgroundNoise
 				if response_to_tag.notes$ == ""
